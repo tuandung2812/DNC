@@ -1,7 +1,7 @@
 data:
   seq-len: 48
   future: 12
-  batch-size: 32
+  batch-size: 128
   source: 
     - S0000137_Ngọc Khánh.csv
     - S0000367_Tô Hiệu.csv
@@ -54,7 +54,7 @@ model:
 
 train:  
   epochs: 100
-  lr: 1e-4
+  lr: 1e-3
   lr_decay: 0.1
   weight_decay: 1e-5
   optim: 'adam'
@@ -67,9 +67,7 @@ result:
   result_dir: "log/dnc/results/"
   metrics: 
     - RMSE
-    - MSE
     - MAPE
     - MAE
-    - MDAPE
     - R2
 

@@ -3,8 +3,8 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 
-from BaseLoader import BaseLoader
-from generator import get_set_and_loader
+from dataloader.BaseLoader import BaseLoader
+from dataloader.generator import get_set_and_loader
 import yaml
 
 class Dataloader(BaseLoader):
@@ -18,6 +18,9 @@ class Dataloader(BaseLoader):
 
     def gen_test_data(self, target_id):
         return self.data_targets[target_id]
+    
+    def gen_validation_data(self, target_id):
+        return self.data_tests[target_id]
 
     def get_loader_and_dataset(self, mode):
         domain_datasets = []

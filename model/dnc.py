@@ -21,6 +21,7 @@ class DNC(nn.Module):
   def __init__(
       self,
       input_size,
+      output_length,
       hidden_size,
       rnn_type='lstm',
       num_layers=1,
@@ -33,7 +34,7 @@ class DNC(nn.Module):
       read_heads=2,
       cell_size=10,
       nonlinearity='tanh',
-      gpu_id=-1,
+      device = 'cuda',
       independent_linears=False,
       share_memory=True,
       debug=False,
@@ -43,6 +44,7 @@ class DNC(nn.Module):
     # todo: separate weights and RNNs for the interface and output vectors
 
     self.input_size = input_size
+    self.output_length = output_length
     self.hidden_size = hidden_size
     self.rnn_type = rnn_type
     self.num_layers = num_layers
@@ -55,7 +57,7 @@ class DNC(nn.Module):
     self.read_heads = read_heads
     self.cell_size = cell_size
     self.nonlinearity = nonlinearity
-    self.gpu_id = gpu_id
+    self.device = device
     self.independent_linears = independent_linears
     self.share_memory = share_memory
     self.debug = debug
@@ -70,6 +72,7 @@ class DNC(nn.Module):
     self.nn_input_size = self.input_size + self.read_vectors_size
     self.nn_output_size = self.output_size + self.read_vectors_size
 
+    self.relu = nn.ReLU()
     self.rnns = []
     self.memories = []
 
@@ -93,7 +96,7 @@ class DNC(nn.Module):
                 mem_size=self.nr_cells,
                 cell_size=self.w,
                 read_heads=self.r,
-                gpu_id=self.gpu_id,
+                device=self.device,
                 independent_linears=self.independent_linears
             )
         )
@@ -107,20 +110,19 @@ class DNC(nn.Module):
               mem_size=self.nr_cells,
               cell_size=self.w,
               read_heads=self.r,
-              gpu_id=self.gpu_id,
+              device = self.device,
               independent_linears=self.independent_linears
           )
       )
       setattr(self, 'rnn_layer_memory_shared', self.memories[0])
 
     # final output layer
-    self.output = nn.Linear(self.nn_output_size, self.input_size)
+    self.output = nn.Linear(self.nn_output_size, self.output_length)
     orthogonal_(self.output.weight)
 
-    if self.gpu_id != -1:
-      [x.cuda(self.gpu_id) for x in self.rnns]
-      [x.cuda(self.gpu_id) for x in self.memories]
-      self.output.cuda()
+    [x.to(self.device) for x in self.rnns]
+    [x.to(self.device) for x in self.memories]
+    self.output.to(self.device)
 
   def _init_hidden(self, hx, batch_size, reset_experience):
     # create empty hidden states if not provided
@@ -130,14 +132,14 @@ class DNC(nn.Module):
 
     # initialize hidden state of the controller RNN
     if chx is None:
-      h = cuda(T.zeros(self.num_hidden_layers, batch_size, self.output_size), gpu_id=self.gpu_id)
+      h = T.zeros(self.num_hidden_layers, batch_size, self.output_size).to(self.device)
       xavier_uniform_(h)
 
       chx = [ (h, h) if self.rnn_type.lower() == 'lstm' else h for x in range(self.num_layers)]
 
     # Last read vectors
     if last_read is None:
-      last_read = cuda(T.zeros(batch_size, self.w * self.r), gpu_id=self.gpu_id)
+      last_read = T.zeros(batch_size, self.w * self.r).to(self.device)
 
     # memory states
     if mhx is None:
@@ -263,16 +265,20 @@ class DNC(nn.Module):
       viz = {k: v.reshape(v.shape[0], v.shape[1] * v.shape[2]) for k, v in viz.items()}
 
     # pass through final output layer
-    inputs = [self.output(i) for i in inputs]
-    outputs = T.stack(inputs, 1 if self.batch_first else 0)
-
-    if is_packed:
-      outputs = pack(output, lengths)
+    # for i in outs:
+    #   print(i.shape)
+    # outs = [self.output(i) for i in outs]
+    # # print(outs.shape)
+    # outputs = T.stack(outs, 1 if self.batch_first else 0)
+    final_controller_output = outs[-1]
+    pred = self.relu(self.output(final_controller_output))
+    # if is_packed:
+    #   outputs = pack(output, lengths)
 
     if self.debug:
-      return outputs, (controller_hidden, mem_hidden, read_vectors), viz
+      return pred, (controller_hidden, mem_hidden, read_vectors), viz
     else:
-      return outputs, (controller_hidden, mem_hidden, read_vectors)
+      return pred, (controller_hidden, mem_hidden, read_vectors)
 
   def __repr__(self):
     s = "\n----------------------------------------\n"
@@ -299,8 +305,6 @@ class DNC(nn.Module):
       s += ', cell_size={cell_size}'
     if self.nonlinearity != 'tanh':
       s += ', nonlinearity={nonlinearity}'
-    if self.gpu_id != -1:
-      s += ', gpu_id={gpu_id}'
     if self.independent_linears != False:
       s += ', independent_linears={independent_linears}'
     if self.share_memory != True:
