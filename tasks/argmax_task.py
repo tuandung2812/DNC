@@ -22,10 +22,10 @@ import torch.optim as optim
 
 from torch.nn.utils import clip_grad_norm_
 
-from dnc.dnc import DNC
-from dnc.sdnc import SDNC
-from dnc.sam import SAM
-from dnc.util import *
+from model.dnc import DNC
+from model.sdnc import SDNC
+from model.sam import SAM
+from model.util import *
 
 parser = argparse.ArgumentParser(description='PyTorch Differentiable Neural Computer')
 parser.add_argument('-input_size', type=int, default=6, help='dimension of input feature')

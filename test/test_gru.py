@@ -20,7 +20,7 @@ sys.path.insert(0, '.')
 
 import functools
 
-from dnc import DNC
+from model import DNC
 from test_utils import generate_data, criterion
 
 

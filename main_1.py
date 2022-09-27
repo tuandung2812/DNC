@@ -28,7 +28,7 @@ from model.sam import SAM
 from model.util import *
 
 parser = argparse.ArgumentParser(description='PyTorch Differentiable Neural Computer')
-parser.add_argument('-input_size', type=int, default=6, help='dimension of input feature')
+parser.add_argument('-input_size', type=int, default=10, help='dimension of input feature')
 parser.add_argument('-rnn_type', type=str, default='lstm', help='type of recurrent cells to use for the controller')
 parser.add_argument('-nhid', type=int, default=64, help='number of hidden units of the inner nn')
 parser.add_argument('-dropout', type=float, default=0, help='controller dropout')
@@ -40,14 +40,14 @@ parser.add_argument('-lr', type=float, default=1e-4, help='initial learning rate
 parser.add_argument('-optim', type=str, default='adam', help='learning rule, supports adam|rmsprop')
 parser.add_argument('-clip', type=float, default=50, help='gradient clipping')
 
-parser.add_argument('-batch_size', type=int, default=100, metavar='N', help='batch size')
+parser.add_argument('-batch_size', type=int, default=32, metavar='N', help='batch size')
 parser.add_argument('-mem_size', type=int, default=20, help='memory dimension')
 parser.add_argument('-mem_slot', type=int, default=16, help='number of memory slots')
-parser.add_argument('-read_heads', type=int, default=4, help='number of read heads')
+parser.add_argument('-read_heads', type=int, default=2, help='number of read heads')
 parser.add_argument('-sparse_reads', type=int, default=10, help='number of sparse reads per read head')
 parser.add_argument('-temporal_reads', type=int, default=2, help='number of temporal reads')
 
-parser.add_argument('-sequence_max_length', type=int, default=4, metavar='N', help='sequence_max_length')
+parser.add_argument('-sequence_max_length', type=int, default=24, metavar='N', help='sequence_max_length')
 parser.add_argument('-curriculum_increment', type=int, default=0, metavar='N', help='sequence_max_length incrementor per 1K iterations')
 parser.add_argument('-curriculum_freq', type=int, default=1000, metavar='N', help='sequence_max_length incrementor per 1K iterations')
 parser.add_argument('-cuda', type=int, default=-1, help='Cuda GPU ID, -1 for CPU')
@@ -199,14 +199,17 @@ if __name__ == '__main__':
     llprint("\rIteration {ep}/{tot}".format(ep=epoch, tot=iterations))
     optimizer.zero_grad()
 
-    random_length = np.random.randint(1, sequence_max_length + 1)
+    # random_length = np.random.randint(1, sequence_max_length + 1)
+    random_length  = 24
 
     input_data, target_output = generate_data(batch_size, random_length, args.input_size, args.cuda)
 
     if rnn.debug:
       output, (chx, mhx, rv), v = rnn(input_data, (None, mhx, None), reset_experience=True, pass_through_memory=True)
     else:
+      # print(input_data.shape)
       output, (chx, mhx, rv) = rnn(input_data, (None, mhx, None), reset_experience=True, pass_through_memory=True)
+      # print(output.shape)
 
     loss = criterion((output), target_output)
 

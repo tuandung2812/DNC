@@ -21,7 +21,7 @@ sys.path.insert(0, '.')
 
 from pyflann import *
 
-from dnc.flann_index import FLANNIndex
+from model.flann_index import FLANNIndex
 
 def test_indexes():
 

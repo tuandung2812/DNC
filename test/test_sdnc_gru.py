@@ -19,7 +19,7 @@ import time
 import functools
 sys.path.insert(0, '.')
 
-from dnc import SDNC
+from model import SDNC
 from test_utils import generate_data, criterion
 
 

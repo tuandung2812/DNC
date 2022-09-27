@@ -1,0 +1,75 @@
+data:
+  seq-len: 48
+  future: 12
+  batch-size: 32
+  source: 
+    - S0000137_Ngọc Khánh.csv
+    - S0000367_Tô Hiệu.csv
+    - S0000370_Bà Triệu.csv
+    - S0000318_Hoàng Cầu.csv
+    - S0000541_Trần Quang Khải.csv
+    - S0000143_Thư viện - ĐHQG Hà Nội.csv
+    - S0000328_Lương Thế Vinh.csv
+    - S0000182_Trường THCS Trung Hòa.csv
+    - S0000210_Trường THCS Yên Sở.csv
+    - S0000345_Đội Cấn.csv
+    - S0000171_GENESIS School.csv
+    - S0000238_Hệ thống liên cấp Lômônôxốp - Mầm non.csv
+    - S0000264_FDS - Tôn Thất Thuyết.csv
+    - S0000289_Nhân Chính.csv
+    - S0000262_Lý Thái Tổ.csv
+
+  target: 
+    - S0000153_Trường Tiểu học Trần Quốc Toản.csv
+    - S0000346_Định Công.csv
+    - S0000229_Quan Hoa.csv
+    - S0000339_Kim Mã.csv
+    - S0000310_Hàng Trống.csv
+
+  data-path: "data/pamair_2019-2022/"
+
+  source-time: 
+    start: '2019-12-31 23:59:59'
+    finish: '2022-01-01 00:00:00'
+
+  test-time:
+    start: '2021-12-31 23:59:59'
+    finish: '2022-06-09 00:00:00'
+
+  target-time:
+    start: '2022-06-08 23:59:59'
+    finish: '2023-01-01 00:00:00'
+
+model:
+  input_size: 1
+  rnn_type: 'lstm'
+  hidden_size: 64
+  dropout: 0
+  memory_type: 'dnc'
+  num_layers: 1
+  num_hidden_layers: 2
+  read_heads: 2
+  mem_size: 16
+  mem_slot: 128
+
+train:  
+  epochs: 100
+  lr: 1e-4
+  lr_decay: 0.1
+  weight_decay: 1e-5
+  optim: 'adam'
+  clip: 1
+  patience: 20
+  checkpoint: "log/dnc/checkpoint.pth"
+  seed: 42
+
+result:
+  result_dir: "log/dnc/results/"
+  metrics: 
+    - RMSE
+    - MSE
+    - MAPE
+    - MAE
+    - MDAPE
+    - R2
+
