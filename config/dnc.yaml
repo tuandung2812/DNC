@@ -50,16 +50,16 @@ model:
   num_hidden_layers: 2
   read_heads: 2
   mem_size: 16
-  mem_slot: 128
+  mem_slot: 32
 
 train:  
   epochs: 100
   lr: 1e-3
-  lr_decay: 0.1
+  lr_decay: 0.5
   weight_decay: 1e-5
   optim: 'adam'
-  clip: 1
-  patience: 20
+  clip: 5
+  patience: 15
   checkpoint: "log/dnc/checkpoint.pth"
   seed: 42
 

@@ -38,7 +38,7 @@ class DNC(nn.Module):
       independent_linears=False,
       share_memory=True,
       debug=False,
-      clip=20
+      clip=0
   ):
     super(DNC, self).__init__()
     # todo: separate weights and RNNs for the interface and output vectors
